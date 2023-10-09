@@ -1,0 +1,72 @@
+- name: config machines to join AD Domain
+  hosts: "{{ target }}"
+  become: true
+  tags: join  
+  environment:
+    http_proxy: "<proxy>"
+    https_proxy: "<proxy>"
+
+  vars:
+    pkgs:
+      - sssd
+      - sssd-tools
+      - realmd
+      - oddjob
+      - oddjob-mkhomedir
+      - adcli
+      - samba-common
+      - samba-common-tools
+      - krb5-workstation
+      - openldap-clients
+  vars_files:
+#    - ../../files/prod-adsvcaccount-pass.yaml
+    - ../../files/prod-ad-var.yaml
+  tasks:
+  - name: Checking if running RedHat/CentOS
+    fail:
+      msg: The system is not running RedHat/CentOS, aborting
+    when: ansible_facts['os_family'] != 'RedHat'
+
+  - name: Checking if packages required to join AD realm are present
+    yum: name={{ pkgs }} state=present
+    ignore_errors: yes
+
+  - name: Joinining the AD realm (creating AD computer account )
+    shell:
+      cmd: |
+        realm join {{ AD_Domain }} -U {{ username }} --computer-ou {{ Join_OU }} << EOF
+        {{password}}
+        EOF
+#    when: ansible_facts["distribution_major_version"] == "8"
+
+  - name: enable sssd profile
+    shell: 
+      cmd: | 
+        authselect select sssd 
+        authselect select sssd with-mkhomedir 
+        systemctl enable --now oddjobd.service
+
+  - name: config sssd.conf
+    blockinfile:
+      path: /etc/sssd/sssd.conf
+      state: present
+      insertafter: '^services'
+      block: |
+        default_domain_suffix = {{AD_Domain}}
+        [nss]
+        homedir_substring = /home
+
+        [pam]
+
+  - name: Enabling oddjobd service
+    systemd:
+      name: oddjobd.service
+      enabled: yes
+      state: started
+
+  - name: Restarting SSSD
+    systemd:
+      name: sssd
+      enabled: yes
+      state: restarted
+

@@ -1,0 +1,6 @@
+- name: clean yum repos
+  import_playbook: ../subscription-manager/subscrition-clean
+- name: register machine to download packages
+  import_playbook: ../subscription-manager/subscrition-register
+- name: join machine to ad
+  import_playbook: ./join-ad.yaml

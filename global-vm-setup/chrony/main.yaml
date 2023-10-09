@@ -1,0 +1,33 @@
+- name: config chrony service
+  hosts: "{{ target }}"
+  become: true
+  tasks:
+  - name: check if 2 ntp add already on machine or not 
+    shell:
+      cmd: |
+        cat /etc/chrony.conf | egrep -i  '^server 10.20.161.161 iburst|^server 10.10.161.161 iburst' | wc -l
+    register: result
+
+  - name: copy chrony file
+    when: result.stdout != 2
+    copy:
+      src: /root/ansible-playbooks/files/chrony.conf
+      dest: /etc/chrony.conf
+      owner: root
+      group: root
+      mode: '0644'
+    notify: restart chrony
+
+  handlers:
+  - name: restart chrony
+    systemd:
+      name: chronyd
+      state: restarted
+
+  - name: clear histoty
+    tags: cls
+    shell:
+      cmd: |
+        >/root/.bash_history
+        history -c
+ 

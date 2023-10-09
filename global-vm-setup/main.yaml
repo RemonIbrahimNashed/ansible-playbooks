@@ -1,0 +1,11 @@
+- name: config audit
+  import_playbook: ./auditd/config.yaml
+- name: config chrony
+  import_playbook : ./chrony/main.yaml
+- name: config ds agent
+  import_playbook: ./ds-agent/main.yaml
+- name: config xagt
+  import_playbook: ./xagt/main.yaml
+- name: disable pcp
+  import_playbook: ./disable-pcp-pmlogger
+

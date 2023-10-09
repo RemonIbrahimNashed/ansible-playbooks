@@ -1,0 +1,16 @@
+- name: clear history and change admin password
+  hosts: "{{ target }}"
+  become: true
+  tasks:
+  - name: disable & stop pmcd , pmlogger 
+    systemd:
+      name: "{{item}}"
+      enabled: false
+      state: stopped
+    loop:
+    - pmcd
+    - pmlogger
+  - name: delete logs
+    file:
+      path: /var/log/pcp
+      state: absent

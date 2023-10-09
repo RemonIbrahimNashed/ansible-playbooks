@@ -1,0 +1,44 @@
+- name: config machines fqdn
+  hosts: "{{ target }}"
+  become: true
+
+  tasks:
+  - name: get hostname
+    shell:
+      cmd: |
+        uname -n  | cut -d . -f 1
+    register: vmname
+  - name: set fqdn
+    shell:
+      cmd: |
+        hostnamectl set-hostname "{{vmname.stdout}}.mastnd.cloudera.onebank.local"
+    when: "'cldmn' in vmname.stdout"
+  - name: set fqdn
+    shell:
+      cmd: |
+        hostnamectl set-hostname "{{vmname.stdout}}.wrknd.cloudera.onebank.local"
+    when: "'cldwn' in vmname.stdout"
+  - name: set fqdn
+    shell:
+      cmd: |
+        hostnamectl set-hostname "{{vmname.stdout}}.kfk.cloudera.onebank.local"
+    when: "'cldkf' in vmname.stdout"
+  - name: set fqdn
+    shell:
+      cmd: |
+        hostnamectl set-hostname "{{vmname.stdout}}.utlty.cloudera.onebank.local"
+    when: "'cldgw' in vmname.stdout"
+  - name: set fqdn
+    shell:
+      cmd: |
+        hostnamectl set-hostname "{{vmname.stdout}}.kts.cloudera.onebank.local"
+    when: "'cldks' in vmname.stdout"
+
+  - name: Make sure a service unit is running
+    systemd:
+      state: restarted
+      enabled: no
+      name: systemd-hostnamed
+
+
+

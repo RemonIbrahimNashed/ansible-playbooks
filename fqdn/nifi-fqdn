@@ -1,0 +1,19 @@
+- name: config machines fqdn
+  hosts: "{{ target }}"
+  become: true
+
+  tasks:
+  - name: get hostname
+    shell:
+      cmd: |
+        uname -n  | cut -d . -f 1
+    register: vmname
+  - name: set fqdn
+    shell:
+      cmd: |
+        hostnamectl set-hostname "{{vmname.stdout}}.nifi.cloudera.onebank.local"
+  - name: Make sure a service unit is running
+    systemd:
+      state: restarted
+      enabled: no
+      name: systemd-hostnamed

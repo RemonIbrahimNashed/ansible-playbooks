@@ -1,0 +1,45 @@
+- name: config deep security agent on machines
+  hosts: "{{ target }}"
+  become: true
+  environment:
+    https_proxy: ""
+    http_proxy: ""
+    no_proxy: ""
+  tasks:
+  - name: Copy file with owner and permissions
+    copy:
+      src: /root/ansible-playbooks/files/AgentDeploymentScript-U03082022.sh
+      dest: /src/
+      owner: root
+      group: root
+      mode: '0750'
+  - name: check installed or not
+    shell:
+      cmd: |
+        rpm -qa ds_agent
+    register: result
+  - name: run agent script
+    shell:
+      chdir: /src/
+      cmd: |
+        bash ./AgentDeploymentScript-U03082022.sh
+    ignore_errors: yes
+    when: result.stdout == ""
+
+  - name: start and enable ds_agent
+    tags: start
+    systemd:
+      daemon_reload: yes
+      name: "ds_agent"
+      state: started
+      enabled: yes
+    ignore_errors: yes
+    register: result
+  - name: try start and enable service manual
+    shell:
+      cmd: |
+        systemctl start ds_agent
+        systemctl enable ds_agent
+    when: result.failed
+    ignore_errors: yes
+

@@ -1,0 +1,16 @@
+- name: config auditd
+  hosts: "{{ target }}"
+  become: true
+  tasks:
+  - name: config auditd.conf
+    copy:
+      src: /root/ansible-playbooks/files/auditd.conf
+      dest: /etc/audit/auditd.conf
+      owner: root
+      group: root
+      mode: '0620'
+  - name: restart auditd
+    shell:
+      cmd: |
+        service auditd stop
+        service auditd start

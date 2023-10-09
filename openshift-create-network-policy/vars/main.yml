@@ -1,0 +1,15 @@
+---
+# vars file for openshift-create-network-policy
+# input from tower UI
+source_namespace: ""
+destination_namespace: ""
+source_pod_label: ""
+destination_pod_label: ""
+port_number: ""
+protocol: ""
+
+# split input into multiple smaller values
+# destination_pod_key: "{{ destination_pod_label.split('=')[0]}}"
+# destination_pod_value: "{{ source_pod_label.split('=')[1]}}"
+# source_pod_key: "{{ source_pod_label.split('=')[0]}}"
+# source_pod_value: "{{ source_pod_label.split('=')[1]}}"

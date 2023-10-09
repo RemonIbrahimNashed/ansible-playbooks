@@ -1,0 +1,8 @@
+---
+# tasks file for add-user-to-wheel-permanently/
+- name: "Add the user {{ user }} to wheel group permanently"
+  user:
+    name: "{{ user }}"
+    groups: wheel
+    append: yes
+

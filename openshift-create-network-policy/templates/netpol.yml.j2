@@ -1,0 +1,34 @@
+{% for source in source_pod_label.split('\n') %}
+{% set source_pod_key = source.split('=')[0] %}
+{% set source_pod_value = source.split('=')[1] %}
+{% set index = loop.index -1 %}
+{% set destination_pod_key = destination_pod_label.split('\n')[index].split('=')[0] %}
+{% set destination_pod_value = destination_pod_label.split('\n')[index].split('=')[1] %}
+{% set port_num = port_number.split('\n')[index] | int %}
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-from-{{source_pod_value}}-to-{{destination_pod_value}}-on-port-{{port_num}}
+  namespace: {{destination_namespace}}
+spec:
+  podSelector:
+    matchLabels:
+      {{destination_pod_key}}: {{destination_pod_value}}
+  ingress:
+    - ports:
+        - protocol: {{protocol}}
+          port: {{ port_num | int }}
+      from:
+        - podSelector:
+            matchLabels:
+              {{source_pod_key}} : {{source_pod_value}}
+          namespaceSelector:
+            matchLabels:
+              name: {{source_namespace}}
+  policyTypes:
+    - Ingress
+---
+
+{% endfor %}
+

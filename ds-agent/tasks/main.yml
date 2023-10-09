@@ -1,0 +1,7 @@
+---
+- when: install == "true"
+  block:
+  - include_tasks: install.yml
+- when: restart == "true"
+  block:
+  - include_tasks: restart-enable.yml

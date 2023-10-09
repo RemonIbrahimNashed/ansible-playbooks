@@ -1,0 +1,50 @@
+- name: hostname
+  shell:
+    cmd: |
+      hostname
+  register: hostname
+- debug:
+    var: hostname.stdout
+- name: run curl command to join mainsite satellite server
+  shell:
+    cmd: |
+      curl -sS --insecure  'https://vsrimdrhsat01.onebank.local/register?activation_keys=rhel_prod&ignore_subman_errors=true&location_id=2&organization_id=1&packages=katello-host-tools+katello-host-tools-tracer&setup_insights=false&update_packages=false' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0LCJpYXQiOjE2OTU2MzEyMTMsImp0aSI6IjVhZmIwZDg5N2Q4YjA2NzU3Zjk4YmZkNDcwOGFhNGI3Zjc0ZDU1NjM5MGE1ODk0N2JmODc5NzEzZmY4YWU5ZDUiLCJzY29wZSI6InJlZ2lzdHJhdGlvbiNnbG9iYWwgcmVnaXN0cmF0aW9uI2hvc3QifQ.sfYIinc-spDQpZufVjuTh_GCRUpN7RNbtXJcqDJvFiI' | bash
+  when: ("vsrimd" in hostname.stdout) or
+        ("vsrisd" in hostname.stdout) or
+        ("vsruat" in hostname.stdout)
+  register: result
+  ignore_errors: true
+- name: run curl command to join dmz capsule
+  shell:
+    cmd: |
+      curl -sS --insecure 'https://vsrdmzrhcap01.onebank.local:9090/register?activation_keys=rhel_prod&ignore_subman_errors=true&location_id=3&organization_id=1&packages=katello-host-tools+katello-host-tools-tracer&update_packages=false' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0LCJpYXQiOjE2OTU4MTA0OTQsImp0aSI6IjZmYTI3NDVkYjY4NjIzZWVlODIyMDU5ZTY2MTdkZjljNTY1ZmFkMDUzYzIwZDAyN2JjZDkwNTBlYTgxYWVjYjciLCJzY29wZSI6InJlZ2lzdHJhdGlvbiNnbG9iYWwgcmVnaXN0cmF0aW9uI2hvc3QifQ.r0y5xUpIRzCO3CREM6cLKf6kfthj_-DUjW2-Wxoid7o' | bash
+  when: '"vsrdmz" in hostname.stdout'
+  register: result
+  ignore_errors: true
+- name: run curl command to join dev capsule
+  shell:
+    cmd: |
+       curl -sS --insecure 'https://vsrdevrhcap01.dev.mdi:9090/register?activation_keys=rhel&force=true&ignore_subman_errors=true&location_id=4&organization_id=1&packages=katello-host-tools+katello-host-tools-tracer&setup_insights=false&update_packages=false' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0LCJpYXQiOjE2OTUxMTAxOTUsImp0aSI6ImRkZWIwNWI0NjE2Y2E1NTJjODkxM2Y1MTE5YjViYWMzNTY5NzFhMjBkZWE3YWY0ZWY0ZGVlN2JiZTBiMzk2YWUiLCJleHAiOjE2OTUxMjQ1OTUsInNjb3BlIjoicmVnaXN0cmF0aW9uI2dsb2JhbCByZWdpc3RyYXRpb24jaG9zdCJ9.kA3hysj-LQFlMG6573T6RgGYnuf-cURr-GFJllR-Cac' | bash
+  when: '"vsrdev" in hostname.stdout'
+  register: result
+  ignore_errors: true
+- name: run curl command to join dr satellite
+  shell:
+    cmd: |
+      curl -sS --insecure 'https://vnrimdrhsat01.onebank.local/register?activation_keys=rhel&force=true&ignore_subman_errors=true&location_id=2&organization_id=1&packages=katello-host-tools+katello-host-tools-tracer&setup_insights=false&update_packages=false' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0LCJpYXQiOjE2OTUyMTQyODAsImp0aSI6ImY4NjFmODdlODJjYWY5ZDFiNDU4ZGU0N2RmMDFhOTkyODEwZDQ1MzczNTYxZjQyYTUyMWIxMjU3YjU5YzI2YTAiLCJzY29wZSI6InJlZ2lzdHJhdGlvbiNnbG9iYWwgcmVnaXN0cmF0aW9uI2hvc3QifQ.L1XJyztZjgYYYx9_jKWcobRRxJnGzhNTiooDc9Me2D4' | bash 
+  when: '"vnr" in hostname.stdout'
+  register: result
+  ignore_errors: true
+- name: remove telnet package if exist
+  yum:
+    name: telnet
+    state: absent
+- name: install telnet package
+  yum:
+    name: telnet
+    state: present
+- name: remove telnet package
+  yum:
+    name: telnet
+    state: absent      
+

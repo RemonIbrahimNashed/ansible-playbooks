@@ -1,0 +1,6 @@
+- shell : 
+    cmd: | 
+      subscription-manager remove --all 
+      subscription-manager unregister 
+      subscription-manager clean 
+      yum clean all

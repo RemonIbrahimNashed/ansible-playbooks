@@ -1,0 +1,36 @@
+---
+# tasks file for update-open-vm-tools
+- name: Create /tmp/open-vm-tools directory
+  file:
+    path: /tmp/open-vm-tools
+    state: directory
+
+- name: copy redhat 8 rpms
+  copy:
+    src: "../files/open-vm-tools-12.1.5-1.el8.x86_64.rpm"
+    dest: /tmp/open-vm-tools/
+  when: ansible_facts['distribution'] == "RedHat" and ansible_facts["distribution_major_version"] == "8"
+
+- name: Copy redhat 7 rpms
+  copy:
+    src: "../files/open-vm-tools-11.0.5-3.el7_9.4.x86_64.rpm"
+    dest: /tmp/open-vm-tools/
+  when: ansible_facts['distribution'] == "RedHat" and ansible_facts["distribution_major_version"] == "7"
+
+- name: run rpm -Uvh
+  shell:
+    chdir: /tmp/open-vm-tools/
+    cmd: |
+      rpm -Uvh /tmp/open-vm-tools/*.rpm
+  ignore_errors: yes
+
+- name: check open-vm-tools status
+  shell:
+    cmd: |
+      rpm -qa | grep -i open-vm-tools
+      systemctl status vmtoolsd
+  register: result
+- name: show database
+  debug:
+    var: result.stdout_lines
+

@@ -1,0 +1,6 @@
+---
+# vars file for ds-agent
+restart: ""
+install: ""
+site: ""
+sendmail: ""

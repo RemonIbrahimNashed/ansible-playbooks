@@ -1,0 +1,9 @@
+---
+# tasks file for subscription-manager
+- when: clean == "true"
+  block:
+  - include_tasks: subscrition-clean
+- when: register == "true"
+  block:
+  - include_tasks: subscrition-register
+

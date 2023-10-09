@@ -1,0 +1,4 @@
+---
+# vars file for change-password
+user: ""
+newpassword: ""

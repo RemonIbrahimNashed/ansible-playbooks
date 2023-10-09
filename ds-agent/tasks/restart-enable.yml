@@ -1,0 +1,13 @@
+- name: Restart service httpd, in all cases
+  ansible.builtin.service:
+    name: ds_agent
+    state: restarted
+    enabled: true
+ register: result
+- name: try start and enable service manual
+  shell:
+    cmd: |
+      systemctl restart ds_agent
+      systemctl enable ds_agent
+  when: result.failed
+  ignore_errors: yes

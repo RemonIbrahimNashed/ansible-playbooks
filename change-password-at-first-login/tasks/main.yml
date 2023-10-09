@@ -1,0 +1,6 @@
+---
+# tasks file for user password change at first login 
+- name: "make password of {{ user }} never expire "
+  shell:
+    cmd: |
+      passwd --expire "{{ user }}"

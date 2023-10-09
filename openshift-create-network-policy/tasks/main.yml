@@ -1,0 +1,20 @@
+- debug:
+    # msg: "Placed here by {{ lookup('env','USER') }} using Ansible, {{ ansible_date_time.date }}."
+    msg: "{{source_pod_label.split('\n')}}"
+- name: validate input
+  fail:
+    msg: "{{source_pod_label.split('\n')|length}} {{destination_pod_label.split('\n')|length}} {{port_number.split('\n')|length}}"
+  when: 
+  - source_pod_label.split('\n')|length != destination_pod_label.split('\n')|length 
+  - source_pod_label.split('\n')|length != port_number.split('\n')|length
+- name: Render template
+  template:
+    src: "{{ role_path }}/templates/netpol.yml.j2"
+    dest: /tmp/netpol.yml
+  no_log: true
+- name: Create a network policy 
+  k8s:
+    state: present
+    definition: "{{ lookup('template', '{{ role_path }}/templates/netpol.yml.j2') }}"
+
+  

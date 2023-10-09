@@ -1,0 +1,73 @@
+---
+# tasks file for ds-agent
+- name: check installed or not
+  shell:
+    cmd: |
+      rpm -qa | grep -i ds_agent
+  register: installed
+  ignore_errors: yes
+- when: installed.rc != 1
+  block:
+  - name: check status
+    shell:
+      cmd: |
+        systemctl is-active ds_agent
+    register: active
+    ignore_errors: yes
+  - name: check status
+    shell:
+      cmd: |
+        systemctl is-enabled ds_agent
+    register: enabled
+    ignore_errors: yes
+  - name: check version
+    shell:
+      cmd: |
+         rpm -qi ds_agent | egrep -i 'version' |  awk '{print $3}'
+    register: version
+  - name: check release
+    shell:
+      cmd: |
+         rpm -qi ds_agent | egrep -i 'release' |  awk '{print $3}'
+    register: release
+  - set_fact:
+      is_installed: "yes"
+      is_active: "{{ active.stdout }}"
+      is_enabled: "{{ enabled.stdout }}"
+      versionnumber: "{{ version.stdout }}.{{ release.stdout }}"
+- when: installed.rc == 1
+  set_fact:
+    is_installed: "no"
+    is_enabled: "N/A"
+    is_active: "N/A"
+    versionnumber: "N/A"
+- name: create empty result dictionary 
+  set_fact:
+    status: {}
+- name: print status 
+  set_fact:
+    status: "{{ status | combine ({ansible_hostname:ansible_default_ipv4.address})}}"
+- name: print output to console
+  debug:
+    msg: "{{ ansible_hostname }}, {{ansible_default_ipv4.address}}, {{ is_installed }}, {{ is_enabled }}, {{ is_active }}, {{ versionnumber }}"
+- name: create report file
+  file:
+    path: "/tmp/{{ site }}_report.csv"
+    state: touch
+  delegate_to: localhost
+- name: save output to report file
+  lineinfile:
+    path:  "/tmp/{{ site }}_report.csv"
+    line: VM_NAME,VM_IP,IS_INSTALLED,IS_ENABLED,IS_ACTIVE,VERSION
+    insertbefore: BOF
+    state: present
+  delegate_to: localhost
+  run_once: true
+
+- name: save output to report file
+  lineinfile:
+    path:  "/tmp/{{ site }}_report.csv"
+    line: "{{ ansible_hostname }},{{ansible_default_ipv4.address}},{{ is_installed }},{{ is_enabled }},{{ is_active }},{{ versionnumber }}"
+    regex: "^{{ ansible_hostname }}"
+    state: present
+  delegate_to: localhost

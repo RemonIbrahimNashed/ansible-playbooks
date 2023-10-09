@@ -1,0 +1,5 @@
+---
+# tasks file for satellite-actions
+- when: register == "true"
+  block:
+  - include_tasks:  satellite-register-hosts.yml

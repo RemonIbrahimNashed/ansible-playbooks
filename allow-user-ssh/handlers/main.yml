@@ -1,0 +1,7 @@
+---
+# handlers file for allow-user-ssh
+- name: Restart SSH
+  systemd:
+    name: sshd
+    state: restarted
+

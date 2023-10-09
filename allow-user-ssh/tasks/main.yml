@@ -1,0 +1,8 @@
+---
+# tasks file for allow-user-ssh
+ - name: "allow {{ user }} group to ssh"
+   shell:
+     cmd: |
+       sed -i 's/^AllowGroups.*/& {{user}}/' /etc/ssh/sshd_config
+   notify:
+      - Restart SSH
